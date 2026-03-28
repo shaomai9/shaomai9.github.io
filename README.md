@@ -227,7 +227,96 @@ python app.py
 
 ## 8. 部署方式
 
-### 8.1 阿里云函数计算部署
+### 8.1 Docker 部署
+
+如果你的前端已经部署完成，推荐只把当前后端项目放到 Linux 服务器上，通过 Docker 启动。
+
+项目已经提供：
+
+- `Dockerfile`
+- `docker-compose.yml`
+- `.dockerignore`
+
+部署步骤：
+
+1. 上传项目后端代码到 Linux 服务器
+2. 准备 `.env`
+3. 执行 Docker Compose 启动
+
+#### 1. 准备 `.env`
+
+```bash
+cp .env.example .env
+```
+
+编辑 `.env`，至少填写：
+
+```env
+APP_ENV=production
+APP_HOST=0.0.0.0
+APP_PORT=8000
+CORS_ORIGINS=["https://你的-github-pages-域名"]
+
+LLM_API_KEY=你的DeepSeekKey
+LLM_API_URL=https://api.deepseek.com/v1/chat/completions
+LLM_MODEL=deepseek-chat
+```
+
+如果你需要 Redis，可以额外补充：
+
+```env
+REDIS_URL=redis://你的redis地址:6379/0
+```
+
+#### 2. 构建并启动
+
+```bash
+docker compose up -d --build
+```
+
+#### 3. 查看运行状态
+
+```bash
+docker compose ps
+docker compose logs -f
+```
+
+#### 4. 验证接口
+
+```bash
+curl http://127.0.0.1:8000/api/v1/health
+```
+
+如果返回：
+
+```json
+{"status":"ok"}
+```
+
+说明后端启动成功。
+
+#### 5. 停止服务
+
+```bash
+docker compose down
+```
+
+如果更新代码后重新部署：
+
+```bash
+docker compose up -d --build
+```
+
+#### 6. 对外访问建议
+
+如果前端已经在 GitHub Pages 上线，建议后端再配一层 Nginx：
+
+- 用域名访问后端 API
+- 统一走 `80/443`
+- 配置 HTTPS
+- 反向代理到容器的 `8000` 端口
+
+### 8.2 阿里云函数计算部署
 
 项目已提供 `app.py` 作为统一启动入口，适合部署为阿里云函数计算 Web 函数。
 
@@ -259,7 +348,7 @@ python app.py
 - [阿里云函数计算 Web 函数快速入门](https://help.aliyun.com/zh/functioncompute/fc/web-function-quick-start)
 - [阿里云函数计算 Custom Runtime 文档](https://help.aliyun.com/zh/functioncompute/fc-2-0/user-guide/custom-runtime/)
 
-### 8.2 前端部署到 GitHub Pages
+### 8.3 前端部署到 GitHub Pages
 
 项目已经额外提供 `docs/` 目录，适合直接用于 GitHub Pages 发布。
 
