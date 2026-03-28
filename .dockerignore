@@ -1,0 +1,9 @@
+.git
+.venv
+__pycache__
+.pytest_cache
+tests
+frontend
+docs
+backend-package
+backend-linux.zip
